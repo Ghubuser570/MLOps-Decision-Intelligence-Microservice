@@ -1,0 +1,29 @@
+# Web Framework & Server
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+
+# Async Queues & Broker
+celery
+redis
+
+# Machine Learning & Data Science
+lightgbm
+catboost
+scikit-learn
+numpy
+pandas
+matplotlib
+
+# MLOps & Observability
+mlflow
+prometheus-fastapi-instrumentator
+prometheus-client
+
+# Security & Rate Limiting
+slowapi
+
+# Testing
+pytest
+httpx
