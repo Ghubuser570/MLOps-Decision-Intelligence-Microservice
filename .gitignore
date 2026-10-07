@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Data & Models (Keep these out of source control)
+*.csv
+*.data
+*.bin
+*.joblib
+mlflow.db
+mlruns/
+
+# Docker
+.dockerignore
+
+# OS & IDEs
+.DS_Store
+.vscode/
+.idea/
