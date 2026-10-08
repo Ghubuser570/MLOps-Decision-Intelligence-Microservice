@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VERDICT | AI Risk Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gray: { 900: '#0f172a', 800: '#1e293b', 700: '#334155' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-slate-300 min-h-screen p-4 md:p-8 font-sans">
+    <div class="max-w-4xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-end border-b border-gray-700 pb-4">
+            <div>
+                <h1 class="text-3xl font-bold text-white tracking-wider">VERDICT <span class="text-emerald-500 text-sm align-top font-mono">v1.0</span></h1>
+                <p class="text-slate-400 text-sm mt-1">LightGBM + CatBoost Ensemble Inference</p>
+            </div>
+            <button type="button" onclick="loadTestData()" class="text-xs bg-slate-700 hover:bg-slate-600 text-white py-1 px-3 rounded transition">
+                ⚡ Load Test Data
+            </button>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- Input Form -->
+            <div class="md:col-span-2 bg-gray-800 p-6 rounded-lg shadow-xl border border-gray-700">
+                <form id="inference-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    
+                    <div><label class="block text-xs text-slate-400 mb-1">Age</label><input type="number" id="age" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm" required></div>
+                    <div><label class="block text-xs text-slate-400 mb-1">Workclass</label><input type="text" id="workclass" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm" required></div>
+                    <div><label class="block text-xs text-slate-400 mb-1">Education Num</label><input type="number" id="education_num" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm" required></div>
+                    <div><label class="block text-xs text-slate-400 mb-1">Marital Status</label><input type="text" id="marital_status" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm" required></div>
+                    <div><label class="block text-xs text-slate-400 mb-1">Occupation</label><input type="text" id="occupation" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm" required></div>
+                    <div><label class="block text-xs text-slate-400 mb-1">Relationship</label><input type="text" id="relationship" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm" required></div>
+                    <div><label class="block text-xs text-slate-400 mb-1">Race</label><input type="text" id="race" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm" required></div>
+                    <div><label class="block text-xs text-slate-400 mb-1">Sex</label><input type="text" id="sex" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm" required></div>
+                    <div><label class="block text-xs text-slate-400 mb-1">Capital Gain</label><input type="number" id="capital_gain" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm" required></div>
+                    <div><label class="block text-xs text-slate-400 mb-1">Capital Loss</label><input type="number" id="capital_loss" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm" required></div>
+                    <div><label class="block text-xs text-slate-400 mb-1">Hours/Week</label><input type="number" id="hours_per_week" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm" required></div>
+                    <div><label class="block text-xs text-slate-400 mb-1">Native Country</label><input type="text" id="native_country" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm" required></div>
+
+                    <div class="sm:col-span-2 mt-4">
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded transition shadow-lg">
+                            EXECUTE AI INFERENCE
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-xl border border-gray-700 flex flex-col justify-center items-center text-center">
+                <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-4">Final Judgment</h2>
+                
+                <div id="loading" class="hidden">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+                    <p class="mt-4 text-xs text-slate-400 animate-pulse">Computing Risk Matrix...</p>
+                </div>
+
+                <div id="result-display" class="w-full hidden">
+                    <div id="badge-decision" class="text-4xl font-black tracking-widest py-4 rounded bg-gray-900 border mb-6"></div>
+                    
+                    <div class="space-y-3 text-left">
+                        <div class="flex justify-between border-b border-gray-700 pb-1">
+                            <span class="text-xs text-slate-400">Probability</span>
+                            <span id="badge-prob" class="font-mono text-white text-sm"></span>
+                        </div>
+                        <div class="flex justify-between border-b border-gray-700 pb-1">
+                            <span class="text-xs text-slate-400">Uncertainty</span>
+                            <span id="badge-unc" class="font-mono text-white text-sm"></span>
+                        </div>
+                        <div class="flex justify-between border-b border-gray-700 pb-1">
+                            <span class="text-xs text-slate-400">Cost Risk</span>
+                            <span id="badge-cost" class="font-mono text-white text-sm"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="idle-state" class="text-slate-600 text-sm mt-8">
+                    Awaiting payload...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function loadTestData() {
+            document.getElementById('age').value = 39;
+            document.getElementById('workclass').value = "State-gov";
+            document.getElementById('education_num').value = 13;
+            document.getElementById('marital_status').value = "Never-married";
+            document.getElementById('occupation').value = "Adm-clerical";
+            document.getElementById('relationship').value = "Not-in-family";
+            document.getElementById('race').value = "White";
+            document.getElementById('sex').value = "Male";
+            document.getElementById('capital_gain').value = 2174;
+            document.getElementById('capital_loss').value = 0;
+            document.getElementById('hours_per_week').value = 40;
+            document.getElementById('native_country').value = "United-States";
+        }
+
+        document.getElementById('inference-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            document.getElementById('idle-state').classList.add('hidden');
+            document.getElementById('result-display').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+
+            const payload = {
+                dataset: "adult",
+                instances: [{
+                    dataset_type: "adult",
+                    age: parseInt(document.getElementById('age').value),
+                    workclass: document.getElementById('workclass').value,
+                    education_num: parseInt(document.getElementById('education_num').value),
+                    marital_status: document.getElementById('marital_status').value,
+                    occupation: document.getElementById('occupation').value,
+                    relationship: document.getElementById('relationship').value,
+                    race: document.getElementById('race').value,
+                    sex: document.getElementById('sex').value,
+                    capital_gain: parseInt(document.getElementById('capital_gain').value),
+                    capital_loss: parseInt(document.getElementById('capital_loss').value),
+                    hours_per_week: parseInt(document.getElementById('hours_per_week').value),
+                    native_country: document.getElementById('native_country').value
+                }]
+            };
+
+            try {
+                const response = await fetch('/api/v1/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                const result = data[0];
+
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('result-display').classList.remove('hidden');
+
+                const decisionBadge = document.getElementById('badge-decision');
+                decisionBadge.innerText = result.decision;
+                
+                if (result.decision === "ACCEPT") {
+                    decisionBadge.className = "text-4xl font-black tracking-widest py-4 rounded bg-emerald-900/30 border border-emerald-500 text-emerald-400 mb-6";
+                } else if (result.decision === "REJECT") {
+                    decisionBadge.className = "text-4xl font-black tracking-widest py-4 rounded bg-rose-900/30 border border-rose-500 text-rose-400 mb-6";
+                } else {
+                    decisionBadge.className = "text-4xl font-black tracking-widest py-4 rounded bg-amber-900/30 border border-amber-500 text-amber-400 mb-6";
+                }
+
+                document.getElementById('badge-prob').innerText = result.probability.toFixed(4);
+                document.getElementById('badge-unc').innerText = result.uncertainty.toFixed(4);
+                document.getElementById('badge-cost').innerText = "$" + result.cost_risk.toFixed(2);
+
+            } catch (error) {
+                alert("Network Error: Could not reach the API.");
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('idle-state').classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
